@@ -8,13 +8,13 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        int windowSize = LZ77.MAX_WINDOW_SIZE, maxLength = LZ77.MAX_LENGTH, minLength = LZ77.MIN_LENGTH;
+        int m = 12, n = 4, k = 2;
 
         if (args.length > 2) {
             try {
-                windowSize = Integer.valueOf(args[2]);
-                maxLength = Integer.valueOf(args[3]);
-                minLength = Integer.valueOf(args[4]);
+                m = Integer.valueOf(args[2]);
+                n = Integer.valueOf(args[3]);
+                k = Integer.valueOf(args[4]);
             } catch (NumberFormatException e) {
                 System.out.println("Please enter valid numbers or use default values.");
                 helpMenu();
@@ -22,7 +22,7 @@ public class Main {
             }
         }
 
-        LZ77 lz77 = new LZ77(windowSize, maxLength, minLength);
+        LZ77 lz77 = new LZ77(m, n, k);
 
         String fileName = args[1];
 
