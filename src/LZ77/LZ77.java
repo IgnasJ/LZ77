@@ -11,7 +11,7 @@ public class LZ77 {
     // 12 bits to store maximum offset distance.
     public static final int MAX_WINDOW_SIZE = (1 << 12) - 1;
     // 4 bits to store length of the match.
-    public static final int MAX_LENGTH = 4;
+    public static final int MAX_LENGTH = (1 << 4) - 1;
     public static final int MIN_LENGTH = 2;
 
     // sliding window size
@@ -68,7 +68,6 @@ public class LZ77 {
                     // is coded string longer than minimum?
                     if (currentMatch.length() >= minLength) {
                         out.writeBit(0);
-                        //System.out.println("OLD: " + matchIndex + ";" + (currentMatch.length()));
                         out.writeBits(matchIndex, m);
                         out.writeBits(currentMatch.length(), n);
                         buffer.append(currentMatch); // append to the search buffer
@@ -80,7 +79,6 @@ public class LZ77 {
                         currentMatch += (char) nextChar;
                         matchIndex = -1;
                         while (currentMatch.length() > -1 && matchIndex == -1) {
-                            //System.out.println("NEW: " + currentMatch.charAt(0) + " " + (int) currentMatch.charAt(0));
                             out.writeBit(1);
                             out.writeByte((byte) currentMatch.charAt(0));
                             buffer.append(currentMatch.charAt(0));
@@ -97,7 +95,6 @@ public class LZ77 {
             while (currentMatch.length() > 0) {
                 if (currentMatch.length() >= minLength) {
                     out.writeBit(0);
-                    //System.out.println("OLD: " + matchIndex + ";" + (currentMatch.length()));
                     out.writeBits(matchIndex, m);
                     out.writeBits(currentMatch.length(), n);
                     buffer.append(currentMatch); // append to the search buffer
@@ -105,10 +102,8 @@ public class LZ77 {
                     matchIndex = 0;
 
                 } else {
-                    // otherwise, output chars one at a time from currentMatch until we find a new match or run out of chars
                     matchIndex = -1;
                     while (currentMatch.length() > 0 && matchIndex == -1) {
-                        //System.out.println("NEW: " + currentMatch.charAt(0) + " " + (int) currentMatch.charAt(0));
                         out.writeBit(1);
                         out.writeByte((byte) currentMatch.charAt(0));
                         buffer.append(currentMatch.charAt(0));
@@ -146,16 +141,12 @@ public class LZ77 {
         int windowSize = (1 << m) - 1;
         int n = bitReader.readByte();
         int minK = bitReader.readByte();
-        //System.out.println(m + " " + n + " " + minK);
         fileLen -= 24;
         StringBuffer buffer = new StringBuffer(windowSize);
-        //System.out.println("Buffer: " + buffer.length());
         while (fileLen >= 8) {
             int flag = bitReader.readBit();
-            //System.out.println("Flag: " + flag);
             if (flag == 1) {
                 int s = bitReader.readBits(8);
-                //System.out.println("Char: " + (char) s);
                 buffer.append((char) s);
                 out.write(s);
                 fileLen -= 9;
@@ -166,16 +157,11 @@ public class LZ77 {
 
                 if(offsetValue < 0 || lengthValue < 0) break;
 
-                //System.out.println("<" + offsetValue + ";" + lengthValue + ">");
                 int start = offsetValue;
                 int end = start + lengthValue;
 
                 String temp = buffer.substring(start, end);
-                //System.out.println("Temp: " + temp);
                 out.write(temp.getBytes(StandardCharsets.ISO_8859_1));
-                /*for (int k = 0; k < temp.length(); k++) {
-                    out.write(temp.charAt(k));
-                }*/
                 buffer.append(temp);
                 fileLen -= (m+n);
             }
