@@ -16,15 +16,19 @@ public class LZ77 {
 
     // sliding window size
     private int windowSize = LZ77.MAX_WINDOW_SIZE;
-    private int bufferSizeBytes = 12;
+    private int m,n,k;
+    //private int bufferSizeBytes = 4;
     private int maxLength = LZ77.MAX_LENGTH;
     private int minLength = LZ77.MIN_LENGTH;
 
 
     public LZ77(int m, int n, int k) {
-        this.bufferSizeBytes = m;
+        this.m = m;
+        this.n = n;
+        this.k = k;
+        //this.bufferSizeBytes = n;
         this.windowSize = (1 << m) - 1;
-        this.maxLength = n;
+        this.maxLength = (1 << n) - 1;
         this.minLength = k;
     }
 
@@ -46,9 +50,10 @@ public class LZ77 {
         InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(inputFileName), StandardCharsets.ISO_8859_1);
         BufferedReader inputFile = new BufferedReader(inputStreamReader);
 
-        out.writeBits(bufferSizeBytes, 8);
-        out.writeBits(maxLength, 8);
-        out.writeBits(minLength, 8);
+        out.writeBits(m, 8);
+        out.writeBits(n, 8);
+        out.writeBits(k, 8);
+
         try {
             String currentMatch = "";
             int matchIndex = 0, tempIndex = 0;
@@ -64,8 +69,8 @@ public class LZ77 {
                     if (currentMatch.length() >= minLength) {
                         out.writeBit(0);
                         //System.out.println("OLD: " + matchIndex + ";" + (currentMatch.length()));
-                        out.writeBits(matchIndex, bufferSizeBytes);
-                        out.writeBits(currentMatch.length(), maxLength);
+                        out.writeBits(matchIndex, m);
+                        out.writeBits(currentMatch.length(), n);
                         buffer.append(currentMatch); // append to the search buffer
                         currentMatch = "" + (char) nextChar;
                         matchIndex = 0;
@@ -93,8 +98,8 @@ public class LZ77 {
                 if (currentMatch.length() >= minLength) {
                     out.writeBit(0);
                     //System.out.println("OLD: " + matchIndex + ";" + (currentMatch.length()));
-                    out.writeBits(matchIndex, bufferSizeBytes);
-                    out.writeBits(currentMatch.length(), maxLength);
+                    out.writeBits(matchIndex, m);
+                    out.writeBits(currentMatch.length(), n);
                     buffer.append(currentMatch); // append to the search buffer
                     currentMatch = "";
                     matchIndex = 0;
@@ -137,12 +142,14 @@ public class LZ77 {
         FileOutputStream out = new FileOutputStream(outputFileName);
         int fileLen = bitReader.length() * 8;
 
-        int bufferSizeBytes = bitReader.readByte();
-        int windowSize = (1 << bufferSizeBytes) - 1;
-        int maxLength = bitReader.readByte();
-        int minLength = bitReader.readByte();
+        int m = bitReader.readByte();
+        int windowSize = (1 << m) - 1;
+        int n = bitReader.readByte();
+        int minK = bitReader.readByte();
+        //System.out.println(m + " " + n + " " + minK);
         fileLen -= 24;
         StringBuffer buffer = new StringBuffer(windowSize);
+        //System.out.println("Buffer: " + buffer.length());
         while (fileLen >= 8) {
             int flag = bitReader.readBit();
             //System.out.println("Flag: " + flag);
@@ -154,19 +161,23 @@ public class LZ77 {
                 fileLen -= 9;
             } else {
 
-                int offsetValue = bitReader.readBits(bufferSizeBytes);
-                int lengthValue = bitReader.readBits(maxLength);
+                int offsetValue = bitReader.readBits(m);
+                int lengthValue = bitReader.readBits(n);
+
+                if(offsetValue < 0 || lengthValue < 0) break;
 
                 //System.out.println("<" + offsetValue + ";" + lengthValue + ">");
                 int start = offsetValue;
                 int end = start + lengthValue;
 
                 String temp = buffer.substring(start, end);
-                for (int k = 0; k < temp.length(); k++) {
+                //System.out.println("Temp: " + temp);
+                out.write(temp.getBytes(StandardCharsets.ISO_8859_1));
+                /*for (int k = 0; k < temp.length(); k++) {
                     out.write(temp.charAt(k));
-                }
+                }*/
                 buffer.append(temp);
-                fileLen -= 17;
+                fileLen -= (m+n);
             }
             if (buffer.length() > windowSize) {
                 buffer = buffer.delete(0, buffer.length() - windowSize);

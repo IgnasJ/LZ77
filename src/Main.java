@@ -77,20 +77,21 @@ public class Main {
         long startTime = System.currentTimeMillis();
         lz77.compress(inputFileName, compressedFileName);
         long endTime = System.currentTimeMillis();
-        System.out.println("Compression Done in : " + (endTime - startTime) + " ms");
+        System.out.println("Compression done in: " + (endTime - startTime)/1000 + "s (" +(endTime - startTime)+"ms)");
     }
 
     private static void decompression(LZ77 lz77, String inputFileName, String decompressedFileName) throws IOException {
-        long startTime = System.currentTimeMillis();
+
         System.out.println("Decompression started...");
+        long startTime = System.currentTimeMillis();
         lz77.decompress(inputFileName, decompressedFileName);
         long endTime = System.currentTimeMillis();
-        System.out.println("Decompression Done in: " + (endTime - startTime) + " ms");
+        System.out.println("Decompression done in: " + (endTime - startTime)/1000 + "s (" +(endTime - startTime)+"ms)");
     }
 
     private static void helpMenu(){
-        System.out.println("Usage : java -jar LZ77.jar c|d inputfile [windowSize maximumMatch minimumMatch]");
-        System.out.println("windowsize is optional. default size is :" + LZ77.MAX_WINDOW_SIZE + ".if Window size gets bigger, then compression time increases.");
+        System.out.println("Usage : java -jar LZ77.jar c|d inputFileName [history_size_bits maximum_Match_size_bits minimumMatch]");
+        System.out.println("History is optional. Default size is :" + LZ77.MAX_WINDOW_SIZE+1 + ". If history size gets bigger, then compression time increases.");
         System.out.println("Compressed file will be written into input_file_name-compressed.extension");
         System.out.println("Decompressed file will be written into input_file_name-decompressed.extension");
         System.exit(1);

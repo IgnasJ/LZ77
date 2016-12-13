@@ -22,8 +22,8 @@ public class BitReader
 	// We must hack around this.
 
 	private interface LengthResetHelper {
-		public long length ();
-		public void reset ();
+		long length();
+		void reset();
 	}
 
 	public BitReader (final InputStream is) throws IOException
