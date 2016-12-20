@@ -11,8 +11,8 @@ public class LZ77 {
     // 12 bits to store maximum offset distance.
     public static final int MAX_WINDOW_SIZE = (1 << 12) - 1;
     // 4 bits to store length of the match.
-    public static final int MAX_LENGTH = (1 << 4) - 1;
-    public static final int MIN_LENGTH = 2;
+    private static final int MAX_LENGTH = (1 << 4) - 1;
+    private static final int MIN_LENGTH = 2;
 
     // sliding window size
     private int windowSize = LZ77.MAX_WINDOW_SIZE;
